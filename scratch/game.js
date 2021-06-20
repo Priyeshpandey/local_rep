@@ -1,5 +1,6 @@
 const LIVE = true
 const DEAD = !LIVE
+let renderSpeed = 1;
 
 function makeGrid(rows, cols) {
     let grid = new Array(rows)
@@ -19,23 +20,34 @@ function initializeGrid(grid, n, m) {
     return grid
 }
 
-function renderGrid(grid, n, m, ctx, rect_size) {
+function renderGrid(grid, n, m, ctx, rect_size, prev_grid) {
+    renderSpeed--;
+    if (renderSpeed == 0){
+    renderSpeed = 10
+
     for (let i = 0; i < n; i++) {
         for (let j = 0; j < m; j++) {
             ctx.beginPath()
             let x = i * rect_size
             let y = j * rect_size
-            if (grid[i][j] === LIVE) {
-                ctx.fillStyle = 'black'
-            } else {
-                ctx.fillStyle = 'white'
-            }
-            ctx.fillRect(x, y, rect_size - 1, rect_size - 1)
-        }
-    }
-    grid = getNextState(grid, n, m)
 
-    window.requestAnimationFrame(() => renderGrid(grid, n, m, ctx, rect_size))
+            if (prev_grid === undefined || grid[i][j] != prev_grid[i][j])
+            {
+                if (grid[i][j] === LIVE) {
+                    ctx.fillStyle = 'black'
+                } else {
+                    ctx.fillStyle = 'white'
+                }
+                    ctx.fillRect(x, y, rect_size - 1, rect_size - 1)
+                }
+            }
+        }
+        prev_grid = grid;
+        grid = getNextState(grid, n, m)
+    }
+
+    window.requestAnimationFrame(() => renderGrid(grid, n, m, ctx, rect_size, prev_grid))
+
 }
 
 function getLiveNeigbhorsCount(grid, n, m, x, y) {
