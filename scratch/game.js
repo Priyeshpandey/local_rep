@@ -1,90 +1,87 @@
-let live = true;
-let dead = !live;
+const LIVE = true
+const DEAD = !LIVE
 
 function makeGrid(rows, cols) {
-    grid = new Array(rows);
-    for (let i=0; i<rows; i++){
-        grid[i] = new Array(cols);
+    let grid = new Array(rows)
+    for (let i = 0; i < rows; i++) {
+        grid[i] = new Array(cols)
     }
-    return grid;
-}
-
-function initializeGrid(grid, n, m){
-    for (let i=0; i<n; i++){
-        for(let j=0; j<m; j++){
-            grid[i][j] = Math.floor(Math.random()*2);
-        }
-    }
-    console.table(grid);
     return grid
 }
 
-function renderGrid(grid, n, m, ctx, rect_size){
-    for (let i=0; i<n; i++){
-            for(let j=0; j<m; j++){
-                ctx.beginPath()
-                if (grid[i][j] == live){
-                    let x = i*rect_size;
-                    let y = j*rect_size;
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(x, y, rect_size-1, rect_size-1)
-                }
-            }
-    }
-    grid = getNextState(grid, n, m);
-
-    window.requestAnimationFrame(() => renderGrid(grid,n,m,ctx,rect_size));
-}
-
-function getLiveNeigbhorsCount(grid, n, m, x, y){
-    sum_=0;
-    for (let i=-1; i<2; i++){
-        for (let j=-1; j<2; j++){
-            if (x+i <0 || x+i >= n || y+j <0 || y+j >=m) continue;
-            if (grid[x+i][y+j] == 1)
-                sum_+=1;
+function initializeGrid(grid, n, m) {
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+            grid[i][j] = Math.floor(Math.random() * 2) === 1
         }
     }
-    sum_ -= grid[x][y];
-    return sum_;
+    console.table(grid)
+    return grid
 }
 
-function getNextState(grid, n, m){
-    newState = makeGrid(n,m);
-    for (let i=0; i<n; i++){
-            for(let j=0; j<m; j++){
-                oldState = grid[i][j];
-                let liveNeighbors = getLiveNeigbhorsCount(grid, n,m,i, j);
-
-                if (oldState == 0 && liveNeighbors == 3){
-                       newState[i][j] = 1;
-                } else if (oldState == 1 && (liveNeighbors < 2 || liveNeighbors > 3)){
-                        newState[i][j] = 0;
-                } else
-                {
-                    newState[i][j] = oldState;
-                }
+function renderGrid(grid, n, m, ctx, rect_size) {
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+            ctx.beginPath()
+            let x = i * rect_size
+            let y = j * rect_size
+            if (grid[i][j] === LIVE) {
+                ctx.fillStyle = 'black'
+            } else {
+                ctx.fillStyle = 'white'
             }
+            ctx.fillRect(x, y, rect_size - 1, rect_size - 1)
+        }
     }
+    grid = getNextState(grid, n, m)
 
-    return newState;
+    window.requestAnimationFrame(() => renderGrid(grid, n, m, ctx, rect_size))
 }
 
-function draw(grid, n, m){
-    const canvas = document.getElementById('gameCanvas')
-    const width = canvas.width;
-    const ctx = canvas.getContext('2d')
-    let rect_size = width / n;
-    renderGrid(grid,n,m,ctx,rect_size);
+function getLiveNeigbhorsCount(grid, n, m, x, y) {
+    let sum = 0
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (x + i < 0 || x + i >= n || y + j < 0 || y + j >= m) continue
+            if (grid[x + i][y + j] === LIVE) sum += 1
+        }
+    }
+    sum -= grid[x][y]
+    return sum
+}
+
+function getNextState(grid, n, m) {
+    let newState = makeGrid(n, m)
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+            oldState = grid[i][j]
+            let liveNeighbors = getLiveNeigbhorsCount(grid, n, m, i, j)
+
+            if (liveNeighbors === 3) {
+                newState[i][j] = LIVE
+            } else if (liveNeighbors < 2 || liveNeighbors > 3) {
+                newState[i][j] = DEAD
+            } else {
+                newState[i][j] = oldState
+            }
+        }
     }
 
+    return newState
+}
 
+function draw(grid, n, m) {
+    const canvas = document.getElementById('gameCanvas')
+    const width = canvas.width
+    const ctx = canvas.getContext('2d')
+    let rect_size = width / n
+    renderGrid(grid, n, m, ctx, rect_size)
+}
 
-function main(){
-    let n = 20;
-    let m = 20;
-    let myGrid = makeGrid(n,m);
-    myGrid = initializeGrid(myGrid,n,m);
-    draw(myGrid,n,m);
-
+function main() {
+    let n = 20
+    let m = 20
+    let myGrid = makeGrid(n, m)
+    myGrid = initializeGrid(myGrid, n, m)
+    draw(myGrid, n, m)
 }
