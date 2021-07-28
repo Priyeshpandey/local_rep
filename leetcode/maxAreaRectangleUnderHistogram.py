@@ -73,8 +73,44 @@ class SegmentTree:
         return self._utilRangeMinQuery(start, end, 0, len(self.auxArr) - 1)
 
 
+# Approach 2, using stack
+
+def max_area_rect(arr):
+    n = len(arr)
+    stack = []
+    leftBound = [0]*n
+    rightBound = [0]*n
+    for i in range(n):
+        if not stack or arr[stack[-1]] < arr[i]:
+            leftBound[i] = i
+            stack.append(i)
+        else:
+            while stack and arr[stack[-1]] >= arr[i]:
+                stack.pop()
+            leftBound[i] = stack[-1]+1 if stack else 0
+            stack.append(i)
+    stack.clear()
+    for i in range(n-1,-1,-1):
+        if not stack or arr[stack[-1]] < arr[i]:
+            rightBound[i] = i
+            stack.append(i)
+        else:
+            while stack and arr[stack[-1]] >= arr[i]:
+                stack.pop()
+            rightBound[i] = stack[-1]-1 if stack else n-1
+            stack.append(i)
+
+    print(leftBound, rightBound, sep='\n')
+
+    maxArea = 0
+    for i in range(n):
+        area = arr[i]*(rightBound[i]-leftBound[i]+1)
+        maxArea = max(maxArea,area)
+
+    return maxArea
+
+
+
 if __name__ == '__main__':
-    arr = [6, 2, 5, 4, 5, 1, 6]
-    segTree = SegmentTree(arr)
-    print(segTree.constructST())
-    print(segTree.rangeMinQuery(1, 3))
+    arr = [2,1,5,6,2,3]
+    print(max_area_rect(arr))
