@@ -3,30 +3,52 @@
 from leetcode.custom_lib import binary_matrix_generator, printMatrix, generate_matrix_from_string
 
 
-def max_area_square(matrix):
-    n, m = len(matrix), len(matrix[0])
-    S = [[0]*m for _ in range(n)]
-    max_pos = 0, 0
+def get_max_hist(arr):
+    n = len(arr)
+    stack = []
+    leftBound = [0] * n
+    rightBound = [0] * n
     for i in range(n):
-        S[i][0] = matrix[i][0]
-        max_pos = (i, 0) if S[i][0] > S[max_pos[0]][max_pos[1]] else max_pos
+        if not stack or arr[stack[-1]] < arr[i]:
+            leftBound[i] = i
+            stack.append(i)
+        else:
+            while stack and arr[stack[-1]] >= arr[i]:
+                stack.pop()
+            leftBound[i] = stack[-1] + 1 if stack else 0
+            stack.append(i)
+    stack.clear()
+    for i in range(n - 1, -1, -1):
+        if not stack or arr[stack[-1]] < arr[i]:
+            rightBound[i] = i
+            stack.append(i)
+        else:
+            while stack and arr[stack[-1]] >= arr[i]:
+                stack.pop()
+            rightBound[i] = stack[-1] - 1 if stack else n - 1
+            stack.append(i)
 
-    for i in range(m):
-        S[0][i] = matrix[0][i]
-        max_pos = (0, i) if S[0][i] > S[max_pos[0]][max_pos[1]] else max_pos
+    # print(leftBound, rightBound, sep='\n')
 
-    for i in range(1,n):
-        for j in range(1,m):
-            if matrix[i][j]:
-                S[i][j] = min(S[i-1][j], S[i][j-1], S[i-1][j-1]) + 1
-                max_pos = (i,j) if S[i][j] > S[max_pos[0]][max_pos[1]] else max_pos
-            else:
-                S[i][j] = 0
+    maxArea = 0
+    for i in range(n):
+        area = arr[i] * (rightBound[i] - leftBound[i] + 1)
+        maxArea = max(maxArea, area)
 
-    fx, fy = max_pos
-    max_val = S[fx][fy]
-    print(fx,fy,max_val)
-    return [[matrix[i][j] for j in range(fy-max_val+1, fy+1)] for i in range(fx-max_val+1, fx+1)]
+    return maxArea
+
+
+def max_area_rectangle(matrix):
+    # use max_area_under_histogram as subroutine and calculate max_area histogram for each row as base and keep
+    # track of max_area
+    rows = len(matrix)
+    cols = len(matrix[0])
+    max_area = get_max_hist(matrix[0])
+    for i in range(1, rows):
+        matrix[i] = [matrix[i][j]+matrix[i-1][j] if matrix[i][j] else 0 for j in range(cols)]
+        max_area = max(max_area,get_max_hist(matrix[i]))
+
+    return max_area
 
 
 if __name__ == '__main__':
@@ -34,4 +56,4 @@ if __name__ == '__main__':
     matrix = binary_matrix_generator(r, c)
     printMatrix(matrix)
     print("-" * 20)
-    printMatrix(max_area_square(matrix))
+    print(max_area_rectangle(matrix))
