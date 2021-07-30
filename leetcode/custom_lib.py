@@ -110,5 +110,11 @@ def printMatrix(matrix):
         print(*row, sep='\t\t')
 
 
+def randomMatrixGenerator(rows, cols, min_val=1, max_val=1000):
+    matrix = [[randint(min_val, max_val) for _ in range(cols)] for _ in range(rows)]
+
+    return matrix
+
+
 if __name__ == '__main__':
     printMatrix(binary_matrix_generator(5, 4))
