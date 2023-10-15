@@ -1,2 +1,2 @@
 # local_rep
-A test repository to test version control locally
+Repo to store my local code.
